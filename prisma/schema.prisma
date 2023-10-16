@@ -7,13 +7,16 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-model Example {
+model Post {
     id        String   @id @default(auto()) @map("_id") @db.ObjectId
-    name      String
+    userId    String   @db.ObjectId
+    content   String
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
-    @@index([name])
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([createdAt, id])
 }
 
 model Account {
@@ -50,6 +53,12 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    posts         Post[]
+
+    followerIds String[] @db.ObjectId
+    followsIds  String[] @db.ObjectId
+    followers   User[]   @relation(name: "followers", fields: [followerIds], references: [id])
+    follows     User[]   @relation(name: "followers", fields: [followsIds], references: [id])
 }
 
 model VerificationToken {
